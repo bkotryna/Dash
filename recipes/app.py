@@ -139,7 +139,7 @@ data.columns.tolist()
 
 
 ###
-# Paste code here related to designing & running the app
+# Paste code here related to designing the app
 # (This section is the same for heroku & jupyter):
 
 
@@ -291,3 +291,12 @@ def update_charts(nutrient_choice, rating_choice):
 
 if __name__ == "__main__":
     app.run_server(debug=True)
+    
+    
+### Run the code below in Ubuntu terminal to deploy the app on Heroku:
+
+# git add .
+# git commit -m 'Add dashboard files'
+# heroku create APP-NAME # Choose a name for your app
+# git push heroku master
+# heroku ps:scale web=1
