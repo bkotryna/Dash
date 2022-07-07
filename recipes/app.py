@@ -1,5 +1,46 @@
-#!/usr/bin/env python
-# coding: utf-8
+### Quick description:
+# Dash practice with recipes from the Allrecipes project
+# 
+# Follow-on work from the tutorial from realpython.com\
+# https://www.justintodata.com/python-interactive-dashboard-with-plotly-dash-tutorial/
+# 
+# Ideas / Plan:
+# - [x] Make sugar column into number
+# - [x] Plot average review vs amount of sugar
+# - [X] Interactivity: can choose y (avg_rating or no_ratings) and x (sugar content or calories)
+
+
+
+
+###
+# The following code is a good starting point for heroku apps,
+# as it contains heroku-specific parts (instead of jupyter-specific parts):
+
+import dash
+from dash import dcc
+from dash import html
+#from jupyter_dash import JupyterDash 
+import pandas as pd
+import plotly.express as px
+
+import numpy as np
+from dash.dependencies import Output, Input
+
+external_stylesheets = [
+    {
+        "href": "https://fonts.googleapis.com/css2?"
+        "family=Lato:wght@400;700&display=swap",
+        "rel": "stylesheet",
+    },
+]
+
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+server = app.server
+app.title = "Recipes: is it sugar or calories?"
+
+###
+# Paste code here related to obtaining data
+# (This section is the same for heroku & jupyter)
 
 # # Dash practice with recipes from the Allrecipes project
 # 
@@ -9,7 +50,7 @@
 # Ideas / Plan:
 # - [x] Make sugar column into number
 # - [x] Plot average review vs amount of sugar
-# - [ ] Interactivity: can choose y (avg_rating or no_ratings) and x (sugar content or calories)
+# - [x] Interactivity: can choose y (avg_rating or no_ratings) and x (sugar content or calories)
 
 # # Part 0: prep data
 
@@ -91,56 +132,22 @@ data.dropna(axis=0, how='any', inplace=True)
 data.shape
 
 
-# # Part III: interactive Dash on heroku
-# 
-# NB Need to restart the kernel before running the below script
+# In[12]:
+
+
+data.columns.tolist()
+
+
+###
+# Paste code here related to designing & running the app
+# (This section is the same for heroku & jupyter):
+
 
 # ### Interactivity with callbacks<br>(a tweaked version of the script)
 # 
 # Interactive filters:
 # - Rating metric
 # - Nutrition parameter
-
-# In[12]:
-
-
-# data is carried over from before
-
-
-# In[13]:
-
-import dash
-from dash import dcc
-from dash import html
-#from jupyter_dash import JupyterDash 
-import pandas as pd
-import plotly.express as px
-
-import numpy as np
-from dash.dependencies import Output, Input
-
-
-# In[14]:
-
-
-external_stylesheets = [
-    {
-        "href": "https://fonts.googleapis.com/css2?"
-        "family=Lato:wght@400;700&display=swap",
-        "rel": "stylesheet",
-    },
-]
-
-
-# In[15]:
-
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-server = app.server
-app.title = "Recipes: is it sugar or calories?"
-
-
-# In[16]:
 
 
 app.layout = html.Div(
@@ -154,7 +161,7 @@ app.layout = html.Div(
                 html.H1(
                     children="Recipe explorations", className="header-title"),
                 html.P(
-                    children="Analyse the behavior of recipe ratings based on their nutritional values",
+                    children=["Analyse the behavior of recipe ratings on allrecipes.com", html.Br(), "based on their nutritional values"],
                     className="header-description")],
             className="header"),
 
@@ -170,8 +177,8 @@ app.layout = html.Div(
                         
                         dcc.Dropdown(
                             options=[
-                                {"label": item, "value": item}
-                                for item in ['avg_rating', 'ratings_no']],
+                                {"label": nice_name, "value": col_name}
+                                for (nice_name, col_name) in [('Average rating', 'avg_rating'), ('Number of ratings', 'ratings_no')]],
                             value = 'avg_rating', # default value
                             id='rating-filter',
                             clearable=False,
@@ -185,8 +192,8 @@ app.layout = html.Div(
                         
                         dcc.Dropdown(
                             options=[
-                                {"label": item, "value": item}
-                                for item in ['nutrition.calories.kcal', 'nutrition.sugarContent.g']],
+                                {"label": nice_name, "value": col_name}
+                                for (nice_name, col_name) in [('Calories', 'nutrition.calories.kcal'), ('Sugar content', 'nutrition.sugarContent.g')]],
                             value = 'nutrition.calories.kcal', # default value
                             id='nutrient-filter',
                             clearable=False,
@@ -211,7 +218,7 @@ app.layout = html.Div(
 )
 
 
-# In[17]:
+# In[18]:
 
 
 @app.callback(
@@ -235,7 +242,7 @@ def update_charts(nutrient_choice, rating_choice):
         x_hover = 'calories'
         hov_text_x = '%{x:.0f} calories<extra></extra>'
     elif nutrient_choice == 'nutrition.sugarContent.g':
-        x_axis_title = 'Sugar content per serving (in grams)'
+        x_axis_title = 'Sugar content per serving (grams)'
         hov_text_x = '%{x:.0f} g sugar<extra></extra>'
     
     
@@ -279,9 +286,8 @@ def update_charts(nutrient_choice, rating_choice):
     return fig
 
 
-# In[18]:
-
+###
+# Deploy to heroku
 
 if __name__ == "__main__":
     app.run_server(debug=True)
-
